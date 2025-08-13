@@ -5,7 +5,7 @@ import tempfile
 import matplotlib.pyplot as plt
 import time
 
-# Hide footer & hamburger (optional)
+# --- CSS Styling for Streamlit ---
 st.markdown("""
     <style>
         #MainMenu {visibility: hidden;}
@@ -38,18 +38,19 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# --- Main App Title ---
 st.markdown("<h1 style='color:#B388FF; text-align:center;'>Color Detection System</h1>", unsafe_allow_html=True)
 st.markdown("<h4 style='color:gray; text-align:center;'>With Hue Histogram (Realtime Frame)</h4>", unsafe_allow_html=True)
 
-# Sidebar - HSV control
+# --- Sidebar - HSV control ---
 with st.sidebar:
     st.markdown("## Adjust Color Detection Parameters (HSV)")
 
-    h_min = st.number_input("Hue Min", 0, 179, 150)
-    h_max = st.number_input("Hue Max", 0, 179, 170)
-    s_min = st.number_input("Saturation Min", 0, 255, 100)
+    h_min = st.number_input("Hue Min", 0, 179, 40)
+    h_max = st.number_input("Hue Max", 0, 179, 80)
+    s_min = st.number_input("Saturation Min", 0, 255, 50)
     s_max = st.number_input("Saturation Max", 0, 255, 255)
-    v_min = st.number_input("Value Min", 0, 255, 150)
+    v_min = st.number_input("Value Min", 0, 255, 50)
     v_max = st.number_input("Value Max", 0, 255, 255)
 
     avg_h = int((h_min + h_max) / 2)
@@ -65,14 +66,18 @@ with st.sidebar:
 st.markdown("#### Select Video Source")
 
 col1, col2, col3 = st.columns(3)
-video_source = st.session_state.get("video_source", None)
+
+# Function to handle button clicks and rerun
+def set_video_source(source):
+    st.session_state.video_source = source
+    st.rerun()
 
 if col1.button("Upload Video", key="btn_upload"):
-    st.session_state.video_source = "upload"
+    set_video_source("upload")
 if col2.button("Webcam", key="btn_cam"):
-    st.session_state.video_source = "webcam"
+    set_video_source("webcam")
 if col3.button("Stream URL", key="btn_url"):
-    st.session_state.video_source = "url"
+    set_video_source("url")
 
 video_source = st.session_state.get("video_source", None)
 
@@ -123,22 +128,29 @@ if cap is not None and cap.isOpened():
         mask = cv2.inRange(hsv, lower, upper)
         result = cv2.bitwise_and(frame, frame, mask=mask)
 
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cv2.drawContours(result, contours, -1, (0, 0, 255), 2)  
+
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         result_rgb = cv2.cvtColor(result, cv2.COLOR_BGR2RGB)
 
         placeholder_orig.image(frame_rgb, caption="Original Frame", use_container_width=True)
-        placeholder_detect.image(result_rgb, caption="Detected Color", use_container_width=True)
+        placeholder_detect.image(result_rgb, caption="Detected Color with Contours", use_container_width=True)
 
         hue_channel = hsv[:, :, 0]
-        hist = cv2.calcHist([hue_channel], [0], mask, [180], [0, 180])
+        hist_all = cv2.calcHist([hue_channel], [0], None, [180], [0, 180])
+        hist_mask = cv2.calcHist([hue_channel], [0], mask, [180], [0, 180])
 
         fig, ax = plt.subplots(figsize=(6,3), facecolor='#1E1E2F')
-        ax.plot(hist, color='#B388FF')
+        ax.plot(hist_all, color='gray', label='All Hue')
+        ax.plot(hist_mask, color='#B388FF', label='Selected Color Hue')
+
         ax.set_facecolor('#1E1E2F')
         ax.tick_params(colors='white')
         ax.set_title('Hue Distribution', color='#B388FF')
         ax.set_xlabel('Hue', color='white')
         ax.set_ylabel('Frequency', color='white')
+        ax.legend(facecolor='#1E1E2F', labelcolor='white')
 
         placeholder_hist.pyplot(fig)
         plt.close(fig)

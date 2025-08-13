@@ -4,17 +4,17 @@
 
 ### Project Overview
 
-This is a simple web application built with Streamlit that detects a specified color range in video frames (from a video file, webcam, or stream URL) and shows the hue distribution histogram in real time.
+This is a simple web application built with **Streamlit** that performs real-time color detection on a video stream. It allows users to select a video source (uploaded file, webcam, or stream URL), adjust the color range using HSV parameters, and visualize both the detected color area and its hue distribution in a live histogram.
 
 ---
 
 ### Features
 
-- Upload a video file or use your webcam or stream URL as video source
-- Adjust HSV (Hue, Saturation, Value) parameters to specify the color range for detection
-- Real-time color detection with mask visualization
-- Display the hue histogram of the detected color area
-- Clean and user-friendly interface with custom styles
+- **Flexible Video Sources:** Supports video from a local file, a live webcam feed, or a network stream URL (e.g., `rtsp://`).
+- **Customizable Color Detection:** Use interactive sliders in the sidebar to define the target color range by adjusting Hue, Saturation, and Value (HSV) minimum and maximum thresholds.
+- **Real-time Visualization:** Displays the original video frame side-by-side with the processed frame, where the detected color is highlighted with contours.
+- **Live Hue Histogram:** Generates and updates a histogram in real time, showing the hue distribution of the entire frame and specifically for the detected color area.
+- **User-friendly Interface:** A clean, responsive GUI with custom CSS styles makes the application easy to use.
 
 ---
 
@@ -53,11 +53,11 @@ Ensure that you have Python installed on your system before proceeding.
 ### Running and Viewing the Application
 
 Ensure you're inside the project directory and the virtual environment is activated.
-1. Run the application:
+1. Start the Streamlit server:
    ```bash
    streamlit run app.py
    ```
-2. Open your browser and go to:
-   ```
-   http://localhost:8501
-   ```
+2.  A new browser tab will automatically open, or you can manually navigate to:
+    ```
+    http://localhost:8501
+    ```
